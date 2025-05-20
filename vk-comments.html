@@ -2,34 +2,72 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Комментарии ВКонтакте</title>
-  <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
+  <title>Простой JS-чат</title>
   <style>
     body {
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #chat {
+      width: 100%;
+      height: 300px;
+      border: 1px solid #ccc;
+      overflow-y: scroll;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    #messageInput {
+      width: 80%;
+      padding: 8px;
+    }
+    #sendBtn {
+      padding: 8px 12px;
+    }
+    .msg {
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="vk_comments"></div>
+  <h2>Мини-чат</h2>
+  <div id="chat"></div>
+  <input type="text" id="messageInput" placeholder="Введите сообщение">
+  <button id="sendBtn">Отправить</button>
 
-  <script type="text/javascript">
-    // Замените 1111111 на ваш apiId приложения ВКонтакте
-    VK.init({
-      apiId: 53590236, // ← сюда вставь свой ID приложения
-      onlyWidgets: true
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Загрузка сообщений из localStorage
+    let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+
+    function renderMessages() {
+      chat.innerHTML = '';
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.textContent = msg;
+        chat.appendChild(div);
+      });
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    renderMessages();
+
+    sendBtn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (text !== '') {
+        messages.push(text);
+        localStorage.setItem('chatMessages', JSON.stringify(messages));
+        renderMessages();
+        input.value = '';
+      }
     });
 
-    // Настройка виджета комментариев
-    VK.Widgets.Comments("vk_comments", {
-      limit: 10,          // Количество отображаемых комментариев
-      attach: "*",        // Разрешённые вложения
-      autoPublish: 1,     // Автоматическая публикация в профиле
-      width: 600          // Ширина блока
-    }, "my-page-id");     // Уникальный идентификатор страницы (можно оставить строкой)
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
   </script>
 </body>
 </html>
