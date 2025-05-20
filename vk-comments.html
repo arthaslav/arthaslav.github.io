@@ -2,63 +2,134 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Простой JS-чат</title>
+  <title>Мини-чат</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
     }
     #chat {
-      width: 100%;
       height: 300px;
-      border: 1px solid #ccc;
       overflow-y: scroll;
+      border: 1px solid #ddd;
+      border-radius: 8px;
       padding: 10px;
-      background: #f9f9f9;
-    }
-    #messageInput {
-      width: 80%;
-      padding: 8px;
-    }
-    #sendBtn {
-      padding: 8px 12px;
+      background: #fafafa;
+      margin-bottom: 10px;
     }
     .msg {
       margin-bottom: 10px;
+      padding: 6px 10px;
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+    }
+    .msg .meta {
+      font-size: 0.8em;
+      color: #555;
+    }
+    .msg .text {
+      margin-top: 4px;
+    }
+    .form-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1976D2;
+    }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #f44336;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-left: auto;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <h2>Мини-чат</h2>
-  <div id="chat"></div>
-  <input type="text" id="messageInput" placeholder="Введите сообщение">
-  <button id="sendBtn">Отправить</button>
+  <div class="chat-container">
+    <h2>Мини-чат</h2>
+    <div id="chat"></div>
+
+    <div class="form-group">
+      <input type="text" id="username" placeholder="Ваше имя">
+    </div>
+    <div class="form-group">
+      <input type="text" id="messageInput" placeholder="Введите сообщение">
+      <button id="sendBtn">Отправить</button>
+    </div>
+    <button class="clear-btn" id="clearBtn">Очистить чат</button>
+  </div>
 
   <script>
     const chat = document.getElementById('chat');
     const input = document.getElementById('messageInput');
+    const usernameInput = document.getElementById('username');
     const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    // Загрузка сообщений из localStorage
     let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
 
     function renderMessages() {
       chat.innerHTML = '';
-      messages.forEach(msg => {
+      messages.forEach(({ name, text, time }) => {
         const div = document.createElement('div');
         div.className = 'msg';
-        div.textContent = msg;
+        div.innerHTML = `
+          <div class="meta">${name} | ${time}</div>
+          <div class="text">${text}</div>
+        `;
         chat.appendChild(div);
       });
       chat.scrollTop = chat.scrollHeight;
     }
 
-    renderMessages();
+    function getTime() {
+      return new Date().toLocaleString();
+    }
 
     sendBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim() || 'Гость';
       const text = input.value.trim();
       if (text !== '') {
-        messages.push(text);
+        messages.push({ name, text, time: getTime() });
         localStorage.setItem('chatMessages', JSON.stringify(messages));
         renderMessages();
         input.value = '';
@@ -68,6 +139,16 @@
     input.addEventListener('keypress', e => {
       if (e.key === 'Enter') sendBtn.click();
     });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Очистить весь чат?')) {
+        messages = [];
+        localStorage.removeItem('chatMessages');
+        renderMessages();
+      }
+    });
+
+    renderMessages();
   </script>
 </body>
 </html>
