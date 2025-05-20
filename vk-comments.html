@@ -1,115 +1,188 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Мини-чат</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Минималистичный Firebase чат</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
       margin: 0;
-      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
       height: 100vh;
     }
-    .chat-container {
-      width: 100%;
-      max-width: 500px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-    h2 {
-      margin-top: 0;
-      color: #333;
-      text-align: center;
-    }
     #chat {
-      height: 300px;
-      overflow-y: scroll;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px;
-      background: #fafafa;
-      margin-bottom: 10px;
+      flex-grow: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
     }
     .msg {
-      margin-bottom: 10px;
-      padding: 6px 10px;
-      background: #e7f3ff;
-      border-left: 4px solid #2196F3;
-      border-radius: 4px;
+      background: #e3e9ff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      max-width: 75%;
+      word-wrap: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     .msg .meta {
-      font-size: 0.8em;
+      font-size: 12px;
       color: #555;
+      margin-bottom: 4px;
+      font-weight: 600;
     }
     .msg .text {
-      margin-top: 4px;
+      font-size: 15px;
+      color: #222;
+      white-space: pre-wrap;
     }
-    .form-group {
+    #inputArea {
       display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
+      padding: 12px 15px;
+      background: #fff;
+      gap: 10px;
+      border-top: 1px solid #ddd;
     }
-    input[type="text"] {
-      flex: 1;
-      padding: 8px;
-      border-radius: 8px;
+    #username {
+      width: 120px;
+      padding: 8px 10px;
       border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      outline-offset: 2px;
+      transition: border-color 0.2s;
     }
-    button {
-      padding: 8px 16px;
-      background-color: #2196F3;
+    #username:focus {
+      border-color: #5b8def;
+      outline: none;
+    }
+    #messageInput {
+      flex-grow: 1;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline-offset: 2px;
+      transition: border-color 0.2s;
+    }
+    #messageInput:focus {
+      border-color: #5b8def;
+      outline: none;
+    }
+    #sendBtn {
+      background: #5b8def;
       color: white;
       border: none;
-      border-radius: 8px;
+      padding: 0 20px;
+      font-size: 14px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s;
     }
-    button:hover {
-      background-color: #1976D2;
+    #sendBtn:hover:not(:disabled) {
+      background: #467cd4;
     }
-    .clear-btn {
-      background: none;
-      border: none;
-      color: #f44336;
-      cursor: pointer;
-      font-size: 0.9em;
-      margin-left: auto;
-      display: block;
+    #sendBtn:disabled {
+      background: #aac3ff;
+      cursor: not-allowed;
+    }
+    #loading {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      padding: 10px 0;
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <h2>Мини-чат</h2>
-    <div id="chat"></div>
 
-    <div class="form-group">
-      <input type="text" id="username" placeholder="Ваше имя">
-    </div>
-    <div class="form-group">
-      <input type="text" id="messageInput" placeholder="Введите сообщение">
-      <button id="sendBtn">Отправить</button>
-    </div>
-    <button class="clear-btn" id="clearBtn">Очистить чат</button>
+  <div id="chat"></div>
+  <div id="loading">Загрузка сообщений...</div>
+
+  <div id="inputArea">
+    <input id="username" type="text" placeholder="Ваш ник" maxlength="20" />
+    <input id="messageInput" type="text" placeholder="Введите сообщение..." maxlength="300" disabled />
+    <button id="sendBtn" disabled>Отправить</button>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { getDatabase, ref, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZA-CGSCOJLQpTB7nS5A9tehxXUhjOKto",
+      authDomain: "minions-6c1f2.firebaseapp.com",
+      databaseURL: "https://minions-6c1f2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "minions-6c1f2",
+      storageBucket: "minions-6c1f2.appspot.com",
+      messagingSenderId: "303661081440",
+      appId: "1:303661081440:web:2ff17007c74e793ff57405"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const chat = document.getElementById('chat');
     const input = document.getElementById('messageInput');
     const usernameInput = document.getElementById('username');
     const sendBtn = document.getElementById('sendBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    const loading = document.getElementById('loading');
 
-    let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+    function getTime() {
+      const now = new Date();
+      return now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU');
+    }
 
-    function renderMessages() {
+    // Активируем кнопку отправки только если есть текст в input
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim() === '';
+    });
+
+    sendBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim() || 'Гость';
+      const text = input.value.trim();
+      if (text !== '') {
+        const time = getTime();
+
+        // Добавляем локально сообщение в чат
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.innerHTML = `
+          <div class="meta">${name} | ${time} (отправлено)</div>
+          <div class="text">${text}</div>
+        `;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+
+        // Отправляем в Firebase
+        push(ref(db, 'messages'), {
+          name,
+          text,
+          time
+        });
+
+        input.value = '';
+        sendBtn.disabled = true;
+        input.focus();
+      }
+    });
+
+    // Загрузка последних 50 сообщений
+    const messagesRef = ref(db, 'messages');
+    const lastMessagesQuery = query(messagesRef, limitToLast(50));
+
+    // При загрузке данных отключаем загрузчик и разблокируем ввод
+    onValue(lastMessagesQuery, (snapshot) => {
       chat.innerHTML = '';
-      messages.forEach(({ name, text, time }) => {
+      snapshot.forEach((childSnapshot) => {
+        const { name, text, time } = childSnapshot.val();
         const div = document.createElement('div');
         div.className = 'msg';
         div.innerHTML = `
@@ -119,36 +192,13 @@
         chat.appendChild(div);
       });
       chat.scrollTop = chat.scrollHeight;
-    }
 
-    function getTime() {
-      return new Date().toLocaleString();
-    }
-
-    sendBtn.addEventListener('click', () => {
-      const name = usernameInput.value.trim() || 'Гость';
-      const text = input.value.trim();
-      if (text !== '') {
-        messages.push({ name, text, time: getTime() });
-        localStorage.setItem('chatMessages', JSON.stringify(messages));
-        renderMessages();
-        input.value = '';
-      }
+      loading.style.display = 'none';
+      input.disabled = false;
+      sendBtn.disabled = input.value.trim() === '';
+      usernameInput.disabled = false;
+      input.focus();
     });
-
-    input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendBtn.click();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      if (confirm('Очистить весь чат?')) {
-        messages = [];
-        localStorage.removeItem('chatMessages');
-        renderMessages();
-      }
-    });
-
-    renderMessages();
   </script>
 </body>
 </html>
