@@ -8,10 +8,9 @@
   html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f5f7fa;
-    height: 100%;
-    overflow: hidden;
   }
 
   body {
@@ -28,6 +27,7 @@
     flex-direction: column;
     gap: 10px;
     scroll-behavior: smooth;
+    min-height: 0; /* важно для flex внутри body */
   }
 
   .msg {
@@ -55,34 +55,31 @@
 
   #inputArea {
     display: flex;
-    padding: 8px;
+    flex-wrap: wrap;
     gap: 8px;
+    padding: 8px;
     background: #fff;
     border-top: 1px solid #ddd;
-    flex-wrap: wrap;
-  }
-
-  #username,
-  #messageInput,
-  #sendBtn {
-    font-size: 14px;
-    border-radius: 6px;
-    padding: 10px;
-    border: 1px solid #ccc;
   }
 
   #username,
   #messageInput {
     flex: 1 1 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
   }
 
   #sendBtn {
     flex: 1 1 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 6px;
     background: #5b8def;
-    color: #fff;
+    color: white;
     border: none;
     cursor: pointer;
-    transition: background 0.3s;
   }
 
   #sendBtn:hover:not(:disabled) {
