@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Комментарии ВКонтакте</title>
+  <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="vk_comments"></div>
+
+  <script type="text/javascript">
+    // Замените 1111111 на ваш apiId приложения ВКонтакте
+    VK.init({
+      apiId: 1111111, // ← сюда вставь свой ID приложения
+      onlyWidgets: true
+    });
+
+    // Настройка виджета комментариев
+    VK.Widgets.Comments("vk_comments", {
+      limit: 10,          // Количество отображаемых комментариев
+      attach: "*",        // Разрешённые вложения
+      autoPublish: 1,     // Автоматическая публикация в профиле
+      width: 600          // Ширина блока
+    }, "my-page-id");     // Уникальный идентификатор страницы (можно оставить строкой)
+  </script>
+</body>
+</html>
