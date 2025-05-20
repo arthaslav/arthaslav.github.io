@@ -2,132 +2,117 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Минималистичный Firebase чат — Миньоны стиль</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мини-чат</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #FFF9C4; /* нежный светло-жёлтый фон */
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f5f7fa;
+      overflow: hidden;
+    }
+
+    .container {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      color: #003366; /* темно-синий текст */
     }
+
     #chat {
       flex-grow: 1;
-      padding: 15px;
       overflow-y: auto;
-      background: #FFFDE7; /* чуть светлее жёлтый */
-      border-bottom: 3px solid #0D47A1; /* насыщенный синий бордер */
+      padding: 12px;
+      background: #fff;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
-      box-shadow: inset 0 0 10px #FFD600AA;
+      gap: 10px;
     }
+
     .msg {
-      background: #FFD600; /* ярко-жёлтый */
-      padding: 10px 15px;
-      border-radius: 12px;
-      max-width: 75%;
-      word-wrap: break-word;
-      box-shadow: 0 3px 6px rgba(0, 71, 171, 0.4);
-      color: #003366; /* темно-синий текст */
-      font-weight: 600;
-      border: 2px solid #0D47A1; /* синий обвод */
+      background: #F7CE5B;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 85%;
+      word-break: break-word;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
     .msg .meta {
       font-size: 12px;
-      color: #0D47A1;
+      color: #555;
+      font-weight: bold;
       margin-bottom: 4px;
-      font-weight: 700;
     }
+
     .msg .text {
-      font-size: 15px;
-      color: #002244;
+      font-size: 14px;
+      color: #222;
       white-space: pre-wrap;
     }
+
     #inputArea {
       display: flex;
-      padding: 12px 15px;
-      background: #0D47A1; /* насыщенный синий фон */
-      gap: 10px;
-      border-top: 3px solid #FFD600; /* желтый бордер */
+      flex-wrap: nowrap;
+      padding: 8px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      gap: 8px;
     }
+
     #username {
-      width: 120px;
-      padding: 8px 10px;
-      border: none;
-      border-radius: 8px;
+      width: 90px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
       font-size: 14px;
-      outline-offset: 2px;
-      transition: box-shadow 0.2s;
-      background: #FFF9C4;
-      color: #003366;
-      font-weight: 600;
     }
-    #username:focus {
-      box-shadow: 0 0 6px 3px #FFD600;
-      outline: none;
-    }
+
     #messageInput {
-      flex-grow: 1;
-      padding: 8px 12px;
+      flex: 1;
+      padding: 8px;
       font-size: 14px;
-      border: none;
-      border-radius: 8px;
-      outline-offset: 2px;
-      transition: box-shadow 0.2s;
-      background: #FFF9C4;
-      color: #003366;
-      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    #messageInput:focus {
-      box-shadow: 0 0 6px 3px #FFD600;
-      outline: none;
-    }
+
     #sendBtn {
-      background: #FFD600; /* ярко-жёлтый */
-      color: #0D47A1; /* синий текст */
-      border: none;
-      padding: 0 20px;
+      padding: 8px 14px;
       font-size: 14px;
-      border-radius: 8px;
+      border-radius: 6px;
+      background: #5b8def;
+      color: white;
+      border: none;
       cursor: pointer;
-      font-weight: 700;
-      transition: background 0.3s, color 0.3s;
-      box-shadow: 0 3px 6px rgba(13, 71, 161, 0.5);
     }
+
     #sendBtn:hover:not(:disabled) {
-      background: #FFC107; /* чуть светлее желтый */
-      color: #002244;
-      box-shadow: 0 4px 8px rgba(0, 51, 102, 0.8);
+      background: #467cd4;
     }
+
     #sendBtn:disabled {
-      background: #FFF59D;
-      color: #54707D;
+      background: #aac3ff;
       cursor: not-allowed;
-      box-shadow: none;
     }
+
     #loading {
       text-align: center;
-      color: #0D47A1;
+      padding: 10px;
       font-size: 14px;
-      padding: 10px 0;
-      font-weight: 700;
+      color: #666;
     }
   </style>
 </head>
 <body>
-
-  <div id="chat"></div>
-  <div id="loading">Loading messages...</div>
-
-  <div id="inputArea">
-    <input id="username" type="text" placeholder="Your nickname" maxlength="20" />
-    <input id="messageInput" type="text" placeholder="Type a message..." maxlength="300" disabled />
-    <button id="sendBtn" disabled>Send</button>
+  <div class="container">
+    <div id="chat"></div>
+    <div id="loading">Загрузка сообщений...</div>
+    <div id="inputArea">
+      <input id="username" type="text" placeholder="Ник" maxlength="20" />
+      <input id="messageInput" type="text" placeholder="Сообщение..." maxlength="300" disabled />
+      <button id="sendBtn" disabled>➤</button>
+    </div>
   </div>
 
   <script type="module">
@@ -155,37 +140,28 @@
 
     function getTime() {
       const now = new Date();
-      return now.toLocaleDateString('en-US') + ' ' + now.toLocaleTimeString('en-US');
+      return now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU');
     }
 
-    // Enable input and button only when username and message are filled
-    function updateInputState() {
-      const nameValid = usernameInput.value.trim().length > 0;
-      const messageValid = input.value.trim().length > 0;
-      input.disabled = !nameValid;
-      sendBtn.disabled = !(nameValid && messageValid);
-    }
-
-    usernameInput.addEventListener('input', updateInputState);
-    input.addEventListener('input', updateInputState);
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim() === '';
+    });
 
     sendBtn.addEventListener('click', () => {
-      const name = usernameInput.value.trim() || 'Guest';
+      const name = usernameInput.value.trim() || 'Гость';
       const text = input.value.trim();
       if (text !== '') {
         const time = getTime();
 
-        // Add message locally for instant feedback
         const div = document.createElement('div');
         div.className = 'msg';
         div.innerHTML = `
-          <div class="meta">${name} | ${time} (sent)</div>
+          <div class="meta">${name} | ${time} (отправлено)</div>
           <div class="text">${text}</div>
         `;
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
 
-        // Push to Firebase
         push(ref(db, 'messages'), {
           name,
           text,
@@ -193,12 +169,11 @@
         });
 
         input.value = '';
-        updateInputState();
+        sendBtn.disabled = true;
         input.focus();
       }
     });
 
-    // Load last 50 messages from Firebase
     const messagesRef = ref(db, 'messages');
     const lastMessagesQuery = query(messagesRef, limitToLast(50));
 
@@ -217,7 +192,8 @@
       chat.scrollTop = chat.scrollHeight;
 
       loading.style.display = 'none';
-      updateInputState();
+      input.disabled = false;
+      sendBtn.disabled = input.value.trim() === '';
       usernameInput.disabled = false;
       input.focus();
     });
